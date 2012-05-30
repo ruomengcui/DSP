@@ -1,0 +1,15 @@
+{
+    "contents" : "run.monte.carlo<-function(){\n  which.alpha=c(0, 1); which.beta=c(0, 3)\n  H=16; z.scale=100; S=100; num.boot=30\n  trials=c(100, 1000, 10000)\n\tl_ply(trials, function(my.N){\n\t  pn=data.name=paste('simPanel', my.N, '.txt', sep=\"\")\n\t  en=paste('simEst', my.N, '.txt', sep=\"\")\n    create.sim.panel(data.name=pn, which.alpha=which.alpha, which.beta=which.beta, N=my.N, S=S, num.boot=num.boot, z.scale=z.scale, H=H)\n\t  calc.parameters(data.in=pn, data.out=en, which.alpha=which.alpha, which.beta=which.beta, mc=T)\n\t})\t\n\tplot.mc(trials, 'simGraph', which.alpha, which.beta)\n}",
+    "created" : 1338335985647.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "3376358193",
+    "id" : "80CEC205",
+    "lastKnownWriteTime" : 1338336185,
+    "path" : "/Volumes/d1/code/getA/R/modules/monte_carlo.R",
+    "properties" : {
+    },
+    "source_on_save" : false,
+    "type" : "r_source"
+}

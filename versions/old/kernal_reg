@@ -1,0 +1,19 @@
+dataSource <<- '/Volumes/d1/outputs/getA/kernal_data_for_R/'
+dataDump <<- '../inputs/RKernal/'
+library('reshape')
+library('ggplot2')
+
+plotKernals<-function(){
+	D <- read.table(paste(dataSource, 'kernal.txt', sep=""), header=TRUE)
+	attach(D)
+	l.lim = -4; r.lim = 4;
+	upper <- pmax(pmin(upper, r.lim), l.lim)
+	skew <- pmax(pmin(skew, r.lim), l.lim)
+	p <- ggplot(D, aes(upper, skew))
+	detach(D)
+	p <-p + stat_density2d(geom="tile", aes(fill = ..density..), contour = F)  +  geom_density2d(bins = 12, size = .25, colour = "black") +facet_grid(. ~dtype)
+	p <-p+ theme_bw()+scale_fill_gradient(limit = c(.3, 2.2), low = "white") + scale_colour_grey(end = 0)+ coord_cartesian(xlim = c(-.5 , 1.5),ylim = c(-.5, 1.2)) + scale_x_continuous('U(A)') + scale_y_continuous('S(A)') +opts(panel.grid.major=theme_line(linetype="dotted", colour = "grey"))+opts(axis.text.x = theme_text(size = 18))+opts(axis.text.y = theme_text(size = 18)) + 
+    opts(axis.title.y = theme_text(size = 20))+opts(axis.title.x = theme_text(size = 20))
+	ggsave(paste(dataDump, "kernal.png", sep=""),  dpi=200)	
+}
+

@@ -1,0 +1,72 @@
+source('getA')
+dataSource <<- '/Volumes/d1/outputs/getA/A_matrix_for_R/'
+dataDump <<- '../inputs/'
+
+plotPolicies<-function(){
+	d=7
+	alpha<-c(1/5, 1, 5)	
+	pols = c('lee', 'chen', 'bray', 'bala', 'n1', 'n2', 'n3')
+	pol = array(, c(d,d,length(alpha), length(pols)))
+	for(i in 1:length(alpha)){
+		pol[,,i, 1]<-getA(array(0, dim=d+1), 0)
+		pol[,,i, 2]<-getA(c(0, alpha[i], array(0, dim=d-1)), 0)
+		pol[,,i, 3]<-getA(c(alpha[i],array(0, dim=d)), 0)
+		pol[,,i, 4]<-getA(c(alpha[i], 4*alpha[i],array(0, dim=d-1)), 0)
+		pol[,,i, 5]<-getA(alpha[i]*c(0, (.75)^(0:(d-1))), 0)
+		pol[,,i, 6]<-getA(alpha[i]*c(.1,0,1,0,1,0,0,0), 0)		
+		pol[,,i, 7]<-getA(alpha[i]*c(1,0,1,0,1,0,0,0), 0)		
+	}
+	for(i in 1:length(alpha)){
+		for(j in 1:length(pols)) plotPolicy(pol[,,i,j], paste("RTheoryPlots/", pols[j], i, sep=""))
+	}
+}
+
+matchAll<-function(){
+	matchToTheory('biz_0.txt', 'biz0')
+	matchToTheory('biz_1.txt', 'biz1')
+	matchToTheory('biz_2.txt', 'biz2')
+	matchToTheory('biz_3.txt', 'biz3')
+	matchToTheory('bizmed_0.txt', 'bizmed0')
+	matchToTheory('bizmed_1.txt', 'bizmed1')
+	matchToTheory('bizmed_2.txt', 'bizmed2')
+	matchToTheory('bizmed_3.txt', 'bizmed3')
+}
+
+matchToTheory<-function(infile, outfile){
+	A=data.matrix(read.table(paste(dataSource, infile, sep=""), header=TRUE))
+	plotPolicy(A, paste("RDataPlots/", outfile, sep=""), ylim=c(-.05,1))
+	C=closestTheory(A)
+	plotPolicy(A-C$A, paste("RDataPlots/", outfile, '_error', sep=""), ylim=c(-.5,.5))
+	exportPar(C$par, paste("RClosestParameters/", outfile, sep=""))
+}			
+	
+closestTheory<-function(A){
+	g=array(.5, sqrt(length(A))+1)
+	o=optim(g, calcTheorySqrDiff, gr = NULL, A, method = "BFGS", control = list(maxit=5000))
+	o$A=getA(o$par, 0)
+	o
+}
+
+calcTheorySqrDiff<-function(gamma, A){	
+	At=getA(gamma, 0)
+	c(A-At)%*%c(A-At)
+}	
+
+exportPar<-function(par, filename){
+	par=trunc(pmax(100*par, 0))/100
+	for(i in 1:7){
+		write(formatC(par[i], digits=2, format = "f"), paste(dataDump, filename, "_", i, ".tex", sep=""));
+	}
+}
+plotPolicy<-function(A, filename, ylim=c(0,1)){
+	d=sqrt(length(A))
+	par(new=F)
+	for(k in 1:d){
+		plot(0:(d-1), A[,k], 'l', xlim=c(0, d-1), ylim=ylim, xlab='', lwd=3, ylab='',bty="n", cex.axis=1.6); par(new=T);
+	}
+	dev.copy(png, paste(dataDump, filename, ".png", sep=""))
+	dev.off()
+}			
+
+
+
