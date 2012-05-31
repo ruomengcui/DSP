@@ -84,23 +84,29 @@ create.wards.panel<-function(){
 create.sim.panel<-function(H=6, N=2000, S=20, which.alpha=c(0, 1), which.beta=c(0, 3), data.name='sim_signal_panel.txt', num.boot=30, positive.Gamma=T, z.scale=1){
 	alpha.max=1
   beta.max=1
-  d=ldply(seq(S), function(cid){
+  a=llply(seq(S), function(cid){
 		alpha=alpha.max*runif(length(which.alpha))
 		beta=beta.max*runif(length(which.beta))
 		signals=mvrnorm(N, rep(0, 2*(H+1)), rwishart(2*(H+1), diag(2*(H+1)))$W)
 		z=mvrnorm(N, rep(0, H+1), rwishart(H+1, z.scale*diag(H+1))$W)
 		eps=positive.Gamma*signals[,seq(H+1)]+z
 		eta=signals[,H+1+seq(H+1)]
-		epso=eps%*%t(solve.for.A(list(alpha=alpha, which.alpha=which.alpha, beta=beta, which.beta=which.beta, Sigma=cov(eps), Lambda=cov(eta), Gamma=cov(eps, eta), L=0))$A)+eta
+    Lambda=cov(eta)
+    Sigma=cov(eps)
+		Gamma=cov(eps, eta)
+    A=solve.for.A(list(alpha=alpha, which.alpha=which.alpha, beta=beta, which.beta=which.beta, Sigma=Sigma, Lambda=Lambda, Gamma=Gamma, L=0))$A
+		epso=eps%*%t(A)+eta
 		colnames(eps)<-paste("e_", seq(dim(eps)[2])-1, sep="")
 		colnames(epso)<-paste("o_", seq(dim(epso)[2])-1, sep="")
 		colnames(z)<-paste("z_", seq(dim(z)[2])-1, sep="")
 		names(alpha)<-paste("alpha_", which.alpha, sep="")
 		names(beta)<-paste("beta_", which.beta, sep="")
 		quart=seq(N)
-		cbind(cid, quart, merge(merge(rbind(alpha),rbind(beta)), as.data.frame(cbind(eps, epso, z))))
+		list(signals=cbind(cid, quart, merge(merge(rbind(alpha),rbind(beta)), as.data.frame(cbind(eps, epso, z)))), mats=list(cid=cid, A=A, Sigma=Sigma, Lambda=Lambda, Gamma=Gamma))
 	})
-	d=block.boot(d, num.boot, 20)
+  d=block.boot(ldply(a, function(x) x$signals), num.boot, 20)
+  s=llply(a, function(x) x$mats)
 	save(d, file=paste(varSave, data.name, sep=''))
+	save(s, file=paste(varSave, "mats_", data.name, sep=''))
 }
 
