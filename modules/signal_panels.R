@@ -84,7 +84,7 @@ create.wards.panel<-function(){
 create.sim.panel<-function(H=6, N=2000, S=20, which.alpha=c(0, 1), which.beta=c(0, 3), data.name='sim_signal_panel.txt', num.boot=30, positive.Gamma=T, z.scale=1){
 	alpha.max=1
   beta.max=1
-  a=llply(seq(S), function(cid){
+  d=ldply(seq(S), function(cid){
 		alpha=alpha.max*runif(length(which.alpha))
 		beta=beta.max*runif(length(which.beta))
 		signals=mvrnorm(N, rep(0, 2*(H+1)), rwishart(2*(H+1), diag(2*(H+1)))$W)
@@ -102,11 +102,9 @@ create.sim.panel<-function(H=6, N=2000, S=20, which.alpha=c(0, 1), which.beta=c(
 		names(alpha)<-paste("alpha_", which.alpha, sep="")
 		names(beta)<-paste("beta_", which.beta, sep="")
 		quart=seq(N)
-		list(signals=cbind(cid, quart, merge(merge(rbind(alpha),rbind(beta)), as.data.frame(cbind(eps, epso, z)))), mats=list(cid=cid, A=A, Sigma=Sigma, Lambda=Lambda, Gamma=Gamma))
+		cbind(cid, quart, merge(merge(rbind(alpha),rbind(beta)), as.data.frame(cbind(eps, epso, z))))
 	})
-  d=block.boot(ldply(a, function(x) x$signals), num.boot, 20)
-  s=llply(a, function(x) x$mats)
+  d=block.boot(d, num.boot, 20)
 	save(d, file=paste(varSave, data.name, sep=''))
-	save(s, file=paste(varSave, "mats_", data.name, sep=''))
 }
 

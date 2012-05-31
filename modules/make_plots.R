@@ -419,6 +419,8 @@ plot.mc<-function(trials, graph.name, which.alpha, which.beta){
   })
   d$N=paste("T==", d$num.obs, sep="")
   d$N<-factor(d$N, levels=paste("T==", unique(d$num.obs)[order(unique(d$num.obs))], sep=""))
-	ggplot(d,aes(y=e,x=p,colour=c))+geom_point()+geom_errorbar(aes(max=u,ymin=l))+geom_abline(intercept=0,slope=1)+facet_grid(var~N,labeller=label_parsed)+scale_colour_grey(end=0.7,start=0)+labs(x="Parameter", y="Estimate")+coord_cartesian(ylim=c(-.025,1.32), xlim=c(-.05, 1.05))+scale_x_continuous(breaks=seq(0, 1, .25))+scale_y_continuous(breaks=seq(0, 1.25, .25))+opts(panel.background=theme_rect(colour="lightgrey"), panel.background = theme_rect(colour=NA), legend.position = "none", strip.text.y=theme_text(size=12), strip.text.x=theme_text(size=12), axis.title.x=theme_text(size = 14), axis.title.y=theme_text(size = 14, angle=90), axis.text.y=theme_text(size=10), axis.text.x=theme_text(size = 10))
-	ggsave(paste(finalOuts, "mc/", graph.name, ".png", sep=""),  dpi=300)	
-} 
+  ggplot(d,aes(y=e,x=p,colour=c))+geom_point()+geom_errorbar(aes(max=u,ymin=l))+geom_abline(intercept=0,slope=1)+facet_grid(var~N,labeller=label_parsed)+scale_colour_grey(end=0.7,start=0)+labs(x="Parameter", y="Estimate")+coord_cartesian(ylim=c(-.025,1.32), xlim=c(-.05, 1.05))+scale_x_continuous(breaks=seq(0, 1, .25))+scale_y_continuous(breaks=seq(0, 1.25, .25))+opts(panel.background=theme_rect(colour="lightgrey"), panel.background = theme_rect(colour=NA), legend.position = "none", strip.text.y=theme_text(size=12), strip.text.x=theme_text(size=12), axis.title.x=theme_text(size = 14), axis.title.y=theme_text(size = 14, angle=90), axis.text.y=theme_text(size=10), axis.text.x=theme_text(size = 10))
+  ggsave(paste(finalOuts, "mc/", graph.name, ".png", sep=""),  dpi=300)	
+  print(ddply(d, c("var", "N"), function(x) c(length(x$e), sum(!x$c), sum(x$e>x$p)/length(x$e), sum(x$e-x$p)/length(x$e))))
+  print(c(length(d$e), sum(!d$c), sum(d$e>d$p)/length(d$e), sum(d$e-d$p)/length(d$e)))
+}
