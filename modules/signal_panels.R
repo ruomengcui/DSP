@@ -87,13 +87,15 @@ create.sim.panel<-function(H=6, N=2000, S=20, which.alpha=c(0, 1), which.beta=c(
   d=ldply(seq(S), function(cid){
 		alpha=alpha.max*runif(length(which.alpha))
 		beta=beta.max*runif(length(which.beta))
-		signals=mvrnorm(N, rep(0, 2*(H+1)), rwishart(2*(H+1), diag(2*(H+1)))$W)
-		z=mvrnorm(N, rep(0, H+1), rwishart(H+1, z.scale*diag(H+1))$W)
+		block.mat=rwishart(2*(H+1), diag(2*(H+1)))$W
+    Omega=rwishart(H+1, z.scale*diag(H+1))$W
+		signals=mvrnorm(N, rep(0, 2*(H+1)), block.mat)
+		z=mvrnorm(N, rep(0, H+1), Omega)
 		eps=positive.Gamma*signals[,seq(H+1)]+z
 		eta=signals[,H+1+seq(H+1)]
-    Lambda=cov(eta)
-    Sigma=cov(eps)
-		Gamma=cov(eps, eta)
+    Sigma=block.mat[seq(H+1),seq(H+1)]+Omega
+    Gamma=block.mat[seq(H+1),H+1+seq(H+1)]
+    Lambda=block.mat[H+1+seq(H+1),H+1+seq(H+1)]
     A=solve.for.A(list(alpha=alpha, which.alpha=which.alpha, beta=beta, which.beta=which.beta, Sigma=Sigma, Lambda=Lambda, Gamma=Gamma, L=0))$A
 		epso=eps%*%t(A)+eta
 		colnames(eps)<-paste("e_", seq(dim(eps)[2])-1, sep="")

@@ -1,6 +1,6 @@
 run.monte.carlo<-function(){
   which.alpha=c(0, 1); which.beta=c(0, 3)
-  H=16; z.scale=100; S=100; num.boot=30
+  H=16; z.scale=100; S=100; num.boot=1
   trials=c(100, 1000)
 	l_ply(trials, function(my.N){
 	  pn=data.name=paste('simPanel', my.N, '.txt', sep="")
